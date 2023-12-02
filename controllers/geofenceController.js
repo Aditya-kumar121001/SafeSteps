@@ -1,18 +1,6 @@
 // Import Geofence model or database functions
 const Geofence = require('../models/Geofence');
 
-// Controller functions
-// app.post('/saveCoordinates', (req, res) => {
-//   const receivedCoordinates = req.body.coordinates;
-
-//   // Assuming you want to simply log the coordinates
-//   console.log('Received Coordinates:', receivedCoordinates);
-
-//   // Perform actions with the coordinates (save to a database, process, etc.)
-
-//   // Send a response (you can customize this as needed)
-//   res.status(200).send('Coordinates received successfully!');
-// });
 
 
 // Usage example with provided coordinates
@@ -52,7 +40,7 @@ const geofenceController = {
         console.log(`user is inside the fence`)
       else 
         console.log(`user is outside the fence`)
-      res.status(200).json({success: true, data: `user is ${inside}`})
+      res.status(200).json({success: true, data: inside})
     } catch(err){
         res.status(500).json({success: false, error:err.message})
     }

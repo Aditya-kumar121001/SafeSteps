@@ -1,4 +1,4 @@
-//const { response } = require("express");
+const { response } = require("express");
 
 var mapOptions;
 var map;
@@ -6,47 +6,39 @@ var map;
 var coordinates = []
 let new_coordinates = []
 let lastElement
-
-function sendCoordinatesToBackend() {
+let isinside
+async function sendCoordinatesToBackend() {
+    try{
     // Assuming your backend endpoint URL
     const backendURL = 'api/geofence/isinside';
 
     // Sending coordinates to the backend
-    fetch(backendURL, {
+    const response = await fetch(backendURL, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({ coordinates }),
-    })
-    .then(response => {
-        if (response.ok) {
-            // Handle success (if needed)
-            console.log('Coordinates sent successfully!');
-        } else {
-            // Handle errors if any
-            console.error('Failed to send coordinates to the backend');
-        }
-    })
-    .catch(error => {
-        console.error('Error sending coordinates:', error);
     });
+
+    if (response.ok) {
+            console.log('Coordinates sent successfully!');
+    } 
+    const data = await response.json();
+    console.log(data)
+    if (data.success) {
+        const isInside = data.inside;
+            const info = document.getElementById('info');
+            info.textContent = isInside ? 'User is inside the fence' : 'User is outside the fence';
+            info.style.color = isInside ? 'green' : 'red';
+    } else {
+        throw new Error('Backend response indicated failure');
+    }
+    } catch(error) {
+        console.error('Error sending coordinates:', error);
+    }
 }
 
-// function sendToBackend(){
-//     console.log(coordinates)
-//     fetch('/geofences', {
-//         method:'POST',
-//         headers:{
-//             'content-type':'geofenceCord'
-//         },
-//         body: JSON.stringify(coordinates)
-//     }).then(response => {
-//         console.log("Received")
-//     }).catch(error => {
-//         console.log("Error:", error)
-//     })
-// };
 
 function InitMap() {
     var location = new google.maps.LatLng(21.2514, 81.6296)
@@ -170,7 +162,7 @@ function InitMap() {
         }
         document.getElementById('info').innerHTML = coordinates;
         
-        sendCoordinatesToBackend();       
+        sendCoordinatesToBackend();
     }
 
     google.maps.event.addListener(drawingManager, 'polygoncomplete', function (event) {
@@ -211,5 +203,6 @@ function InitMap() {
 }
 
 InitMap()
+
 
 
