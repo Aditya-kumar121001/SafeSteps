@@ -1,3 +1,8 @@
+const User = require("../models/User")
+const bcrypt = require("bcrypt")
+const jwt = require("jsonwebtoken")
+const asyncHandler = require("express-async-handler")
+const cookie = require("cookie-parser")
 // Mock users (for demonstration purposes, replace with actual user authentication logic)
 const users = [
     { id: 1, username: 'user1', password: 'password1', role: 'user' },
@@ -5,28 +10,37 @@ const users = [
   ];
   
   // Controller functions
-  const authController = {
-    loginUser: (req, res) => {
-      const { username, password } = req.body;
-  
-      // Simulated authentication logic (replace with actual authentication)
-      const user = users.find(u => u.username === username && u.password === password);
-  
-      if (!user) {
-        return res.status(401).json({ success: false, message: 'Invalid credentials' });
-      }
-  
-      // Generate token (dummy token for demonstration)
-      const token = generateToken(user.id, user.role);
-      res.status(200).json({ success: true, token });
+  const loginUser = asyncHandler(async(req,res)=>{
+    const {email, password} = req.body
+    if(!email || !password){
+        console.log("all feilds are mandatory")
     }
-  };
-  
-  // Function to generate token (replace with actual token generation logic)
-  function generateToken(userId, role) {
-    const token = 'dummyToken'; // Replace with JWT or other token generation logic
-    return token;
-  }
-  
-  module.exports = authController;
-  
+    const user = await User.findOne({email})
+
+    //compare entered password with hashed password
+    if(user && (await bcrypt.compare(password, user.password))){
+        const accessToken = jwt.sign(
+            {
+              user: {
+                username: user.username,
+                email: user.email,
+                id: user.id,
+              },
+            },
+            process.env.ACCESS_TOKEN_SECERT,
+            { expiresIn: "15m" }
+        ); 
+        console.log(`accessToken: ${accessToken}`);
+
+        res.cookie("token",accessToken,{
+            httpOnly:true,
+            expires: new Date(Date.now()+60*1000)
+        })
+    }
+    else {
+          console.log("email or password is not valid");
+    }
+    res.redirect("/logout")
+});
+
+module.exports = {loginUser}

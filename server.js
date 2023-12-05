@@ -17,6 +17,8 @@ app.use(errorHandler);
 const connectDB = require("./database/connection")
 connectDB();
 
+//view engine
+app.set("view engine", "hbs")
           
 // Routes
 const geofenceRoutes = require('./routes/geofenceRoutes');
@@ -24,13 +26,17 @@ const locationRoutes = require('./routes/locationRoutes');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 
-// Set the directory for serving static files (like index.html)
-app.use(express.static(path.join(__dirname, 'public')));
+// // Set the directory for serving static files (like index.html)
+// app.use(express.static(path.join(__dirname, 'public')));
 
-// Define the route for the home page
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html')); 
-});
+// // Define the route for the home page
+// app.get('/', (req, res) => {
+//   res.sendFile(path.join(__dirname, 'public', 'index.html')); 
+// });
+
+app.get("/", (req,res)=>{
+  res.render("login")
+})
 
 app.use('/api', geofenceRoutes);
 app.use('/api', locationRoutes);
